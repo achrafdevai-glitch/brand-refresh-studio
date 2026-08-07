@@ -1,6 +1,3 @@
-import logoAsset from "@/assets/logo.png.asset.json";
-import heroVideoAsset from "@/assets/hero-video.mp4.asset.json";
-
 export const BRAND = {
   name: "MERMAID STORE",
   nameAr: "ميرميد ستور",
@@ -8,8 +5,8 @@ export const BRAND = {
   taglineAr: "أناقة في كل تفصيل",
   description:
     "متجر ميرميد للأزياء والحقائب النسائية الراقية — منتجات مختارة بعناية مع توصيل لكل ولايات الوطن.",
-  logo: logoAsset.url,
-  heroVideo: heroVideoAsset.url,
+  logo: "/logo.png",
+  heroVideo: "/videos/video.mp4",
   social: {
     facebook:
       "https://www.facebook.com/share/1CMgBdgC3z/?mibextid=wwXIfr",
