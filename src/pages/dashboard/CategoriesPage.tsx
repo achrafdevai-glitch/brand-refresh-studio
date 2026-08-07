@@ -220,11 +220,12 @@ const CategoriesPage = () => {
                 </Button>
                 {formData.image_url && (
                   <div className="relative mt-2">
-                    <img
+                    <StorageImage
                       src={formData.image_url}
                       alt=""
                       className="w-full h-32 object-cover rounded-lg"
                     />
+
                     <button
                       type="button"
                       onClick={() =>
