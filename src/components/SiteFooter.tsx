@@ -45,8 +45,8 @@ const SiteFooter = () => {
             {socials.map(({ key, href, label, Icon }) => (
               <li key={key}>
                 <a
-                  href={href || "#"}
-                  target={href ? "_blank" : undefined}
+                  href={href}
+                  target="_blank"
                   rel="noopener noreferrer"
                   aria-label={label}
                   className="flex h-11 w-11 items-center justify-center rounded-full border border-gold/30 bg-gold/10 text-gold transition-all duration-300 hover:-translate-y-0.5 hover:bg-gold hover:text-primary-foreground"
