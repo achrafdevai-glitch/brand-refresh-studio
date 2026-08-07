@@ -47,7 +47,6 @@ const HeroSection = () => {
         muted
         playsInline
         preload="metadata"
-        poster={BRAND.logo}
         aria-hidden="true"
         className="absolute inset-0 h-full w-full object-cover transition-opacity duration-500"
         style={{ pointerEvents: "none" }}
