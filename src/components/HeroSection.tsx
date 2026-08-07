@@ -49,8 +49,9 @@ const HeroSection = () => {
       </video>
 
       {/* Gradient Overlays */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/45 to-black/85" />
-      <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/40" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/30 to-black/80" />
+      <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-black/30" />
+
 
       {/* Floating particles */}
       <div className="absolute inset-0 opacity-40">
