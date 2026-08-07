@@ -69,10 +69,10 @@ const SettingsPage = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {settings?.hero_video && (
+          {settings?.["hero_video"] && (
             <div className="rounded-lg overflow-hidden bg-muted">
               <video
-                src={settings.hero_video}
+                src={settings["hero_video"]}
                 controls
                 className="w-full max-h-64 object-cover"
               />

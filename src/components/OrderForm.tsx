@@ -598,7 +598,7 @@ const OrderForm = ({ product, onSuccess, onCancel }: OrderFormProps) => {
                 <SelectValue placeholder="اختر فرع المكتب" />
               </SelectTrigger>
               <SelectContent className="rounded-xl max-h-60">
-                {officeCommunes[selectedWilayaName].map((commune) => (
+                {(officeCommunes[selectedWilayaName] ?? []).map((commune) => (
                   <SelectItem key={commune} value={commune} className="rounded-lg">
                     {commune}
                   </SelectItem>
