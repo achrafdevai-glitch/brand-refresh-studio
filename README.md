@@ -1,29 +1,156 @@
-# Welcome to your Lovable project
+# MERMAID STORE — متجر ميرميد
 
-This project was built with [Lovable](https://lovable.dev).
+موقع تجارة إلكترونية فاخر للأزياء والحقائب النسائية، مع لوحة تحكم كاملة لإدارة المنتجات والطلبات.
 
-## Build with Lovable
+---
 
-Open your project in the [Lovable editor](https://lovable.dev) and keep building.
+## 1. نظرة عامة
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
-- **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
+| العنصر | التفاصيل |
+| --- | --- |
+| الواجهة | React 19 + TanStack Start (توجيه بالملفات) + Vite |
+| التنسيق | Tailwind CSS v4 + shadcn/ui |
+| الحركات | Framer Motion |
+| قاعدة البيانات والمصادقة | Lovable Cloud (قاعدة بيانات PostgreSQL + مصادقة + تخزين ملفات) |
+| اللغة | العربية (RTL) |
 
-## Development
+---
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+## 2. الهوية البصرية
 
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
+الألوان مستخرجة من شعار العلامة (الذهبي الوردي / النحاسي) ومعرّفة كلها في `src/styles.css`:
+
+| الرمز | الاستخدام |
+| --- | --- |
+| `--gold` | اللون الأساسي للعلامة (ذهبي وردي) |
+| `--gold-light` | تدرّج فاتح للتأثيرات واللمعان |
+| `--gold-deep` | نحاسي غامق للتباين |
+| `--cream` / `--blush` | خلفيات دافئة ناعمة |
+
+> ملاحظة مهمة: لا تستخدم ألوانًا مباشرة مثل `text-white` أو `bg-[#...]` داخل المكوّنات.
+> استخدم دائمًا الرموز الدلالية: `text-gold`, `bg-background`, `border-border` ...
+
+الخطوط: `Cormorant Garamond` للعناوين و`Poppins` للنصوص.
+
+بيانات العلامة (الاسم، الشعار، الفيديو، روابط التواصل) موجودة في ملف واحد:
+
+```
+src/config/brand.ts
 ```
 
-## Built with
+لتغيير روابط فيسبوك/إنستغرام/تيك توك، عدّل الحقل `social` في هذا الملف فقط.
 
-- TanStack Start
-- TypeScript
-- React
-- Tailwind CSS
+---
+
+## 3. بنية المشروع
+
+```
+src/
+├── assets/                 ملفات الشعار والفيديو (مستضافة على CDN)
+├── components/             مكوّنات الواجهة
+│   ├── HeroSection.tsx     قسم البطل: فيديو الخلفية + الشعار الطائر
+│   ├── CategoriesSection.tsx
+│   ├── ProductsSection.tsx
+│   ├── ProductCard.tsx / ProductModal.tsx
+│   ├── OrderForm.tsx       نموذج الطلب (58 ولاية + أسعار التوصيل)
+│   └── ui/                 مكوّنات shadcn
+├── config/brand.ts         إعدادات العلامة التجارية
+├── contexts/ThemeContext.tsx   الوضع الليلي/النهاري
+├── hooks/
+│   ├── useAuth.tsx         حالة المصادقة + التحقق من صلاحية الأدمين
+│   ├── useProducts.ts / useOrders.ts / useCategories.ts ...
+├── lib/admin.functions.ts  دالة خادم لتهيئة حساب الأدمين
+├── pages/dashboard/        صفحات لوحة التحكم
+├── routes/                 مسارات التطبيق (توجيه بالملفات)
+│   ├── index.tsx                   الصفحة الرئيسية (المتجر)
+│   ├── admin.tsx                   صفحة دخول الإدارة
+│   └── _authenticated/             كل ما بداخله محمي بالمصادقة
+│       ├── route.tsx               البوابة الأمنية
+│       ├── dashboard.tsx           هيكل لوحة التحكم
+│       └── dashboard.*.tsx         صفحات اللوحة
+└── styles.css              نظام التصميم بالكامل
+```
+
+---
+
+## 4. الدخول إلى لوحة التحكم
+
+الدخول **مخفي عن الزوار** ويتم كالتالي:
+
+1. في الصفحة الرئيسية، اضغط **ضغطة مزدوجة (Double Click)** على الشعار الدائري.
+2. ستنتقل تلقائيًا إلى صفحة `/admin`.
+3. أدخل البريد الإلكتروني وكلمة المرور الخاصة بالإدارة.
+4. بعد نجاح الدخول تنتقل إلى `/dashboard/orders`.
+
+### الحساب الإداري
+
+- الحساب يُنشأ تلقائيًا في أول زيارة لصفحة `/admin`.
+- بيانات الدخول محفوظة **كأسرار على الخادم فقط** في المتغيّرين:
+  - `ADMIN_EMAIL`
+  - `ADMIN_PASSWORD`
+- **لا توجد أي بيانات دخول مكتوبة داخل كود الواجهة.**
+- لتغيير كلمة المرور: حدّث السر `ADMIN_PASSWORD` من إعدادات الأسرار في المشروع.
+
+---
+
+## 5. الأمان
+
+| الطبقة | الحماية |
+| --- | --- |
+| الواجهة | مسارات `/dashboard/*` داخل `_authenticated/` ولا تُعرض دون جلسة صالحة |
+| البوابة | `src/routes/_authenticated/route.tsx` تتحقق من المستخدم ومن دوره قبل التحميل |
+| الأدوار | جدول منفصل `user_roles` (لا تُخزَّن الأدوار في جدول المستخدمين) |
+| قاعدة البيانات | RLS مفعّل على كل الجداول: قراءة عامة للمنتجات/الأصناف فقط، وكل عمليات الكتابة والطلبات للأدمين فقط |
+| الأسرار | كلمة مرور الأدمين والمفاتيح الحساسة تعمل على الخادم فقط |
+
+> حتى لو تلاعب أي شخص بالواجهة، قواعد RLS في قاعدة البيانات تمنع الوصول إلى الطلبات أو التعديل على المنتجات.
+
+---
+
+## 6. جداول قاعدة البيانات
+
+| الجدول | الوظيفة |
+| --- | --- |
+| `products` | المنتجات (السعر، الصور، الفيديو، الملاحظات) |
+| `product_variants` | الألوان والمقاسات والمخزون |
+| `categories` | الأصناف |
+| `orders` | الطلبات الواردة من نموذج الشراء |
+| `delivery_prices` | أسعار التوصيل حسب الولاية (منزل / مكتب) |
+| `settings` | إعدادات عامة مثل فيديو الصفحة الرئيسية |
+| `user_roles` | أدوار المستخدمين (admin) |
+
+يوجد مُشغِّل (Trigger) لخصم المخزون تلقائيًا عند تسجيل طلب جديد.
+
+---
+
+## 7. لوحة التحكم
+
+| الصفحة | الوظيفة |
+| --- | --- |
+| الطلبات | عرض الطلبات، تغيير الحالة، الحذف |
+| المنتجات | إضافة/تعديل/حذف المنتجات مع الصور والفيديو والمتغيّرات |
+| الأصناف | إدارة أصناف المتجر |
+| التوصيل | تعديل أسعار التوصيل لكل ولاية |
+| الإحصائيات | ملخّص المبيعات والطلبات |
+| الإعدادات | تغيير فيديو الصفحة الرئيسية |
+
+---
+
+## 8. التطوير المحلي
+
+```bash
+bun install
+bun run dev
+```
+
+ثم افتح: `http://localhost:8080`
+
+---
+
+## 9. تحسين محركات البحث (SEO)
+
+- عنوان ووصف مخصّص لكل صفحة عبر `head()` في ملفات المسارات.
+- وسوم `og:` و`twitter:` للمشاركة على الشبكات الاجتماعية.
+- صفحات الإدارة معلّمة بـ `noindex, nofollow`.
+- أيقونة الموقع (Favicon) الخاصة بالعلامة في `public/favicon.ico`.
+- الموقع بالكامل بلغة `ar` واتجاه `rtl`.
