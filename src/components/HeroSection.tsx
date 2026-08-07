@@ -1,108 +1,73 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { useSettings } from "@/hooks/useSettings";
-import { useAdmin } from "@/contexts/AdminContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@tanstack/react-router";
 import { Moon, Sun } from "lucide-react";
+import { useSettings } from "@/hooks/useSettings";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import logo from "@/assets/logo.png";
+import { BRAND } from "@/config/brand";
 
 const HeroSection = () => {
   const { data: settings } = useSettings();
-  const { login } = useAdmin();
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const videoRef = useRef<HTMLVideoElement>(null);
-  
-  const [clickCount, setClickCount] = useState(0);
-  const [showLoginDialog, setShowLoginDialog] = useState(false);
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
 
-  const heroVideo = settings?.hero_video || "/videos/hero-video.mp4";
+  const heroVideo = settings?.["hero_video"] || BRAND.heroVideo;
 
   // Smooth video transition when source changes
   useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.style.opacity = '0';
-      setTimeout(() => {
-        if (videoRef.current) {
-          videoRef.current.load();
-          videoRef.current.play();
-          videoRef.current.style.opacity = '1';
-        }
-      }, 300);
-    }
+    if (!videoRef.current) return;
+    const video = videoRef.current;
+    video.style.opacity = "0";
+    const timer = setTimeout(() => {
+      video.load();
+      void video.play().catch(() => undefined);
+      video.style.opacity = "1";
+    }, 300);
+    return () => clearTimeout(timer);
   }, [heroVideo]);
 
-  const handleLogoClick = () => {
-    const newCount = clickCount + 1;
-    setClickCount(newCount);
-    
-    if (newCount >= 2) {
-      setShowLoginDialog(true);
-      setClickCount(0);
-    }
-    
-    setTimeout(() => setClickCount(0), 500);
+  // Secret entrance: double-click the logo to reach the admin login page.
+  const handleLogoDoubleClick = () => {
+    navigate({ to: "/admin" });
   };
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (login(username, password)) {
-      setShowLoginDialog(false);
-      navigate("/dashboard");
-    } else {
-      setError("اسم المستخدم أو كلمة المرور غير صحيحة");
-    }
-  };
-
 
   return (
     <section className="relative min-h-screen overflow-hidden">
-      {/* Video Background with smooth transition */}
+      {/* Video Background */}
       <video
         ref={videoRef}
         autoPlay
         loop
         muted
         playsInline
-        className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
+        className="absolute inset-0 h-full w-full object-cover transition-opacity duration-500"
         style={{ pointerEvents: "none" }}
       >
         <source src={heroVideo} type="video/mp4" />
       </video>
 
       {/* Gradient Overlays */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/80" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/45 to-black/85" />
       <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/40" />
-      
-      {/* Animated Particles Effect */}
+
+      {/* Floating particles */}
       <div className="absolute inset-0 opacity-40">
-        <motion.div 
+        <motion.div
           animate={{ y: [-20, 20], opacity: [0.3, 0.8, 0.3] }}
           transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-1/4 left-1/4 w-2 h-2 rounded-full bg-white"
+          className="absolute top-1/4 left-1/4 h-2 w-2 rounded-full bg-gold"
         />
-        <motion.div 
+        <motion.div
           animate={{ y: [20, -20], opacity: [0.5, 1, 0.5] }}
           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-          className="absolute top-1/3 right-1/3 w-1.5 h-1.5 rounded-full bg-white"
+          className="absolute top-1/3 right-1/3 h-1.5 w-1.5 rounded-full bg-gold-light"
         />
-        <motion.div 
+        <motion.div
           animate={{ y: [-15, 15], opacity: [0.4, 0.9, 0.4] }}
           transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-          className="absolute bottom-1/3 left-1/3 w-2 h-2 rounded-full bg-white"
+          className="absolute bottom-1/3 left-1/3 h-2 w-2 rounded-full bg-gold"
         />
       </div>
 
@@ -111,101 +76,78 @@ const HeroSection = () => {
         variant="ghost"
         size="icon"
         onClick={toggleTheme}
-        className="absolute top-6 left-6 z-20 glass rounded-full w-12 h-12 hover:scale-110 transition-all duration-300 border border-white/30"
+        aria-label="تبديل المظهر"
+        className="glass absolute top-6 left-6 z-20 h-12 w-12 rounded-full border border-gold/40 transition-all duration-300 hover:scale-110"
       >
         {theme === "dark" ? (
-          <Sun className="h-5 w-5 text-white" />
+          <Sun className="h-5 w-5 text-gold-light" />
         ) : (
-          <Moon className="h-5 w-5 text-white" />
+          <Moon className="h-5 w-5 text-gold-light" />
         )}
       </Button>
 
       {/* Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4">
-        {/* Floating Circular Logo */}
-        <motion.div 
-          className="cursor-pointer group"
-          onClick={handleLogoClick}
-          animate={{ y: [-5, 5, -5] }}
-          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4">
+        {/* Premium floating logo */}
+        <motion.div
+          className="group cursor-pointer select-none"
+          onDoubleClick={handleLogoDoubleClick}
+          title={BRAND.name}
+          initial={{ opacity: 0, scale: 0.85 }}
+          animate={{ opacity: 1, scale: 1, y: [-8, 8, -8] }}
+          transition={{
+            opacity: { duration: 1 },
+            scale: { duration: 1, ease: "easeOut" },
+            y: { duration: 6, repeat: Infinity, ease: "easeInOut" },
+          }}
         >
           <div className="relative">
-            {/* Glow Effect */}
-            <div className="absolute -inset-4 rounded-full bg-white/10 blur-2xl" />
-            
-            {/* Circular Logo Container - Black part only */}
-            <div className="relative w-40 h-40 md:w-52 md:h-52 lg:w-60 lg:h-60 rounded-full overflow-hidden group-hover:scale-105 transition-transform duration-700 shadow-2xl bg-transparent">
+            {/* Rose gold aura */}
+            <motion.div
+              animate={{ opacity: [0.35, 0.7, 0.35], scale: [0.95, 1.08, 0.95] }}
+              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute -inset-8 rounded-full bg-gold/30 blur-3xl"
+            />
+
+            {/* Rotating halo ring */}
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+              className="absolute -inset-3 rounded-full border border-dashed border-gold/50"
+            />
+
+            {/* Logo */}
+            <div className="relative h-44 w-44 overflow-hidden rounded-full border border-gold/30 shadow-2xl transition-transform duration-700 group-hover:scale-105 md:h-56 md:w-56 lg:h-64 lg:w-64">
               <img
-                src={logo}
-                alt="Sneaky Shop Logo"
-                className="w-full h-full object-cover drop-shadow-2xl mix-blend-multiply dark:mix-blend-screen dark:invert"
+                src={BRAND.logo}
+                alt={`${BRAND.name} logo`}
+                className="h-full w-full object-cover"
               />
+              {/* Shimmer sweep */}
+              <div className="animate-shimmer pointer-events-none absolute inset-0" />
             </div>
           </div>
         </motion.div>
 
-        {/* Tagline */}
-        <motion.div 
+        {/* Wordmark + tagline */}
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="mt-8 text-center"
+          className="mt-10 text-center"
         >
-          <p className="text-xl md:text-2xl text-white/80 font-light tracking-[0.3em] uppercase">
-            Dress Than Differently
+          <h1 className="gradient-text font-serif text-4xl tracking-[0.25em] md:text-6xl">
+            {BRAND.name}
+          </h1>
+          <p className="mt-4 text-base font-light tracking-[0.35em] text-gold-light/90 uppercase md:text-xl">
+            {BRAND.tagline}
           </p>
-          
-          {/* Decorative Line */}
-          <div className="mt-6 mx-auto w-40 md:w-56">
-            <div className="h-px bg-gradient-to-r from-transparent via-white/50 to-transparent" />
+
+          <div className="mx-auto mt-6 w-40 md:w-56">
+            <div className="divider-gold" />
           </div>
         </motion.div>
       </div>
-
-      {/* Login Dialog */}
-      <Dialog open={showLoginDialog} onOpenChange={setShowLoginDialog}>
-        <DialogContent className="sm:max-w-md glass border-white/20" dir="rtl">
-          <DialogHeader>
-            <DialogTitle className="text-center text-3xl font-serif text-white">
-              تسجيل الدخول
-            </DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleLogin} className="space-y-6 mt-4">
-            <div className="space-y-2">
-              <Label htmlFor="username" className="text-muted-foreground">اسم المستخدم</Label>
-              <Input
-                id="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="أدخل اسم المستخدم"
-                className="h-12 border-white/30 focus:border-white bg-background/50"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-muted-foreground">كلمة المرور</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="أدخل كلمة المرور"
-                className="h-12 border-white/30 focus:border-white bg-background/50"
-              />
-            </div>
-            {error && (
-              <p className="text-destructive text-sm text-center bg-destructive/10 py-2 rounded-lg">
-                {error}
-              </p>
-            )}
-            <Button 
-              type="submit" 
-              className="w-full h-12 text-lg bg-white text-black hover:bg-white/90 rounded-xl font-medium"
-            >
-              دخول
-            </Button>
-          </form>
-        </DialogContent>
-      </Dialog>
     </section>
   );
 };
