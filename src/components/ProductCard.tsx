@@ -4,6 +4,7 @@ import { useProductVariants } from "@/hooks/useProductVariants";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ShoppingBag, Sparkles, TrendingDown, XCircle } from "lucide-react";
+import { StorageImage } from "@/components/StorageImage";
 
 interface ProductCardProps {
   product: Product;
@@ -43,12 +44,10 @@ const ProductCard = ({ product, onSelect, index = 0 }: ProductCardProps) => {
         
         <div className="relative aspect-[3/4] overflow-hidden">
           {product.images && product.images.length > 0 ? (
-            <motion.img
+            <StorageImage
               src={product.images[0]}
               alt={product.name}
-              className={`w-full h-full object-cover ${isOutOfStock ? 'grayscale' : ''}`}
-              whileHover={{ scale: 1.08 }}
-              transition={{ duration: 0.6 }}
+              className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${isOutOfStock ? 'grayscale' : ''}`}
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-secondary to-muted flex items-center justify-center">

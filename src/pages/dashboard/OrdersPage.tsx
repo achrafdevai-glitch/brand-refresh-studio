@@ -18,6 +18,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Trash2, Eye, Printer, Package, User, Phone, MapPin, Truck, Calendar, Palette, Ruler } from "lucide-react";
+import { RefreshCw, AlertCircle } from "lucide-react";
+import { BRAND } from "@/config/brand";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 
@@ -38,7 +40,7 @@ const statusColors: Record<Order["status"], string> = {
 };
 
 const OrdersPage = () => {
-  const { data: orders, isLoading } = useOrders();
+  const { data: orders, isLoading, isError, isFetching, refetch } = useOrders();
   const updateStatus = useUpdateOrderStatus();
   const deleteOrder = useDeleteOrder();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -58,8 +60,8 @@ const OrdersPage = () => {
         </head>
         <body>
           <div class="header">
-            <h1>SNEAKY SHOP</h1>
-            <p>Dress Than Differently</p>
+            <h1>${BRAND.name}</h1>
+            <p>${BRAND.tagline}</p>
           </div>
           <div class="info"><span class="label">المنتج:</span> ${order.product_name}</div>
           <div class="info"><span class="label">العميل:</span> ${order.customer_name}</div>
@@ -100,9 +102,31 @@ const OrdersPage = () => {
     );
   }
 
+  if (isError) {
+    return (
+      <div className="space-y-4">
+        <h2 className="text-2xl font-bold">الطلبات</h2>
+        <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-8 text-center">
+          <AlertCircle className="mx-auto mb-3 h-10 w-10 text-destructive" />
+          <p className="mb-4 text-muted-foreground">تعذّر تحميل الطلبات. تحقق من الاتصال ثم أعد المحاولة.</p>
+          <Button onClick={() => void refetch()} variant="outline">
+            <RefreshCw className="ml-2 h-4 w-4" />
+            إعادة المحاولة
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold">الطلبات</h2>
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-2xl font-bold">الطلبات</h2>
+        <Button variant="outline" size="sm" onClick={() => void refetch()} disabled={isFetching}>
+          <RefreshCw className={`ml-2 h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
+          تحديث
+        </Button>
+      </div>
 
       {!orders || orders.length === 0 ? (
         <motion.div 

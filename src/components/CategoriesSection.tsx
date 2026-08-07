@@ -7,6 +7,7 @@ import ProductCard from "@/components/ProductCard";
 import ProductModal from "@/components/ProductModal";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronRight, Sparkles } from "lucide-react";
+import { StorageImage } from "@/components/StorageImage";
 
 const CategoriesSection = () => {
   const { data: categories, isLoading: categoriesLoading } = useCategories();
@@ -79,10 +80,10 @@ const CategoriesSection = () => {
                     >
                       <div className="relative aspect-square rounded-2xl overflow-hidden bg-card border border-border/30 hover:border-white/30 transition-all duration-500 shadow-lg hover:shadow-2xl">
                         {category.image_url ? (
-                          <img
+                          <StorageImage
                             src={category.image_url}
                             alt={category.name}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                           />
                         ) : (
                           <div

@@ -15,6 +15,7 @@ export const BRAND = {
     "متجر ميرميد للأزياء والحقائب النسائية الراقية — منتجات مختارة بعناية مع توصيل لكل ولايات الوطن.",
   logo: logoAsset.url,
   heroVideo: heroVideoAsset.url,
+  // Social profile links — fill these in to activate the footer links.
   social: {
     facebook: "",
     instagram: "",

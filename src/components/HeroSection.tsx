@@ -15,9 +15,13 @@ const HeroSection = () => {
 
   const heroVideo = settings?.["hero_video"] || BRAND.heroVideo;
 
-  // Smooth video transition when source changes
+  // Smooth video transition when the source actually changes (skips first mount,
+  // so the browser never downloads the video twice).
+  const initialVideo = useRef(heroVideo);
   useEffect(() => {
     if (!videoRef.current) return;
+    if (initialVideo.current === heroVideo) return;
+    initialVideo.current = heroVideo;
     const video = videoRef.current;
     video.style.opacity = "0";
     const timer = setTimeout(() => {
@@ -42,6 +46,8 @@ const HeroSection = () => {
         loop
         muted
         playsInline
+        preload="metadata"
+        aria-hidden="true"
         className="absolute inset-0 h-full w-full object-cover transition-opacity duration-500"
         style={{ pointerEvents: "none" }}
       >
@@ -122,6 +128,10 @@ const HeroSection = () => {
               <img
                 src={BRAND.logo}
                 alt={`${BRAND.name} logo`}
+                width={256}
+                height={256}
+                fetchPriority="high"
+                decoding="async"
                 className="h-full w-full object-cover"
               />
               {/* Shimmer sweep */}
