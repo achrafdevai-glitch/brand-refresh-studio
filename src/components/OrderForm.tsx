@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CheckCircle, Loader2, Home, Building2, User, Phone, MapPin, Sparkles, Truck, Palette, Ruler, Package, MessageSquare, XCircle } from "lucide-react";
+import { CheckCircle, Loader2, Home, Building2, User, Phone, MapPin, Sparkles, Truck, Palette, Ruler, Package, MessageSquare, XCircle, AlertCircle } from "lucide-react";
 
 const orderSchema = z.object({
   customerName: z.string().min(3, "الاسم يجب أن يكون 3 أحرف على الأقل").max(100, "الاسم طويل جداً"),
@@ -51,10 +51,14 @@ interface OrderFormProps {
 const OrderForm = ({ product, onSuccess, onCancel }: OrderFormProps) => {
   const [isSuccess, setIsSuccess] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const createOrder = useCreateOrder();
-  const { data: deliveryPrices } = useDeliveryPrices();
+  const {
+    data: deliveryPrices,
+    isLoading: isLoadingDelivery,
+    isError: deliveryError,
+  } = useDeliveryPrices();
   const { data: variants } = useProductVariants(product.id);
-  const [deliveryPrice, setDeliveryPrice] = useState(0);
 
   const hasVariants = variants && variants.length > 0;
 
@@ -127,14 +131,29 @@ const OrderForm = ({ product, onSuccess, onCancel }: OrderFormProps) => {
     }
   }, [selectedColor, hasVariants, setValue]);
 
-  useEffect(() => {
-    if (selectedWilayaName && selectedDeliveryType && deliveryPrices) {
-      const price = getDeliveryPrice(deliveryPrices, selectedWilayaName, selectedDeliveryType as "home" | "office");
-      setDeliveryPrice(price);
-    }
-  }, [selectedWilayaName, selectedDeliveryType, deliveryPrices]);
+  // Delivery price is derived (not stored in state) so it always reflects the
+  // currently selected wilaya + delivery method, straight from delivery_prices.
+  const deliveryPriceRow = selectedWilayaName
+    ? deliveryPrices?.find((p) => p.wilaya === selectedWilayaName)
+    : undefined;
+  const hasDeliveryPrice = Boolean(selectedWilayaName && deliveryPriceRow);
+  const deliveryPrice = hasDeliveryPrice
+    ? getDeliveryPrice(deliveryPrices, selectedWilayaName, selectedDeliveryType)
+    : 0;
+
+  const productTotal = product.new_price * quantity;
+  const grandTotal = productTotal + deliveryPrice;
 
   const onSubmit = async (data: OrderFormData) => {
+    // Prevent duplicate submissions.
+    if (createOrder.isPending || isSuccess) return;
+    setSubmitError(null);
+
+    if (!hasDeliveryPrice) {
+      setSubmitError("تعذّر تحديد سعر التوصيل لهذه الولاية. يرجى إعادة اختيار الولاية والمحاولة مجدداً.");
+      return;
+    }
+
     try {
       await createOrder.mutateAsync({
         product_id: product.id,
@@ -145,7 +164,7 @@ const OrderForm = ({ product, onSuccess, onCancel }: OrderFormProps) => {
         commune: selectedWilayaData?.communes.find((c) => c.id === data.commune)?.name || data.commune,
         delivery_type: data.deliveryType,
         delivery_price: deliveryPrice,
-        total_price: (product.new_price * quantity) + deliveryPrice,
+        total_price: grandTotal,
         selected_size: data.selectedSize || null,
         selected_color: data.selectedColor || null,
         selected_shoe_size: data.selectedShoeSize || null,
@@ -158,7 +177,12 @@ const OrderForm = ({ product, onSuccess, onCancel }: OrderFormProps) => {
         onSuccess();
       }, 3000);
     } catch (error) {
-      // Error handled by react-query
+      console.error("[order-form] submission failed", error);
+      const message =
+        typeof error === "object" && error !== null && "message" in error
+          ? String((error as { message: unknown }).message)
+          : "خطأ غير معروف";
+      setSubmitError(`تعذّر إرسال الطلب: ${message}. يرجى المحاولة مرة أخرى.`);
     }
   };
 
@@ -663,19 +687,53 @@ const OrderForm = ({ product, onSuccess, onCancel }: OrderFormProps) => {
             <span className="font-medium">x{quantity}</span>
           </div>
         )}
+        {product.show_quantity && quantity > 1 && (
+          <div className="flex justify-between items-center text-sm">
+            <span className="text-muted-foreground">إجمالي المنتج:</span>
+            <span className="font-medium">{productTotal.toLocaleString()} د.ج</span>
+          </div>
+        )}
         <div className="flex justify-between items-center text-sm">
-          <span className="text-muted-foreground">سعر التوصيل:</span>
-          <span className="font-medium">{deliveryPrice.toLocaleString()} د.ج</span>
+          <span className="text-muted-foreground">
+            سعر التوصيل{selectedWilayaName ? ` (${selectedWilayaName} — ${selectedDeliveryType === "home" ? "المنزل" : "المكتب"})` : ""}:
+          </span>
+          <span className="font-medium">
+            {isLoadingDelivery ? (
+              <Loader2 className="inline h-4 w-4 animate-spin text-gold" />
+            ) : hasDeliveryPrice ? (
+              `${deliveryPrice.toLocaleString()} د.ج`
+            ) : (
+              <span className="text-muted-foreground">اختر الولاية</span>
+            )}
+          </span>
         </div>
+        {deliveryError && (
+          <p className="text-destructive text-xs">تعذّر تحميل أسعار التوصيل. تحقق من الاتصال.</p>
+        )}
         <div className="flex justify-between items-center text-lg font-bold pt-3 border-t border-border/30">
           <span className="bg-gradient-to-r from-gold to-gold-light bg-clip-text text-transparent">
             المجموع:
           </span>
           <span className="bg-gradient-to-r from-gold to-gold-light bg-clip-text text-transparent">
-            {((product.new_price * quantity) + deliveryPrice).toLocaleString()} د.ج
+            {grandTotal.toLocaleString()} د.ج
           </span>
         </div>
       </motion.div>
+
+      <AnimatePresence>
+        {submitError && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            role="alert"
+            className="flex items-start gap-2 rounded-xl border border-destructive/40 bg-destructive/10 p-3"
+          >
+            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
+            <p className="text-sm text-destructive">{submitError}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Submit Buttons */}
       <motion.div 
@@ -688,17 +746,21 @@ const OrderForm = ({ product, onSuccess, onCancel }: OrderFormProps) => {
           type="button"
           variant="outline"
           onClick={onCancel}
+          disabled={createOrder.isPending}
           className="flex-1 h-12 rounded-xl"
         >
           إلغاء
         </Button>
         <Button
           type="submit"
-          disabled={createOrder.isPending || isVariantOutOfStock()}
+          disabled={createOrder.isPending || isSuccess || isVariantOutOfStock()}
           className="flex-1 h-12 rounded-xl bg-gradient-to-r from-gold to-gold-light text-primary-foreground hover:opacity-90"
         >
           {createOrder.isPending ? (
-            <Loader2 className="h-5 w-5 animate-spin" />
+            <>
+              <Loader2 className="ml-2 h-5 w-5 animate-spin" />
+              جارٍ إرسال الطلب...
+            </>
           ) : (
             <>
               <Sparkles className="h-4 w-4 ml-2" />
