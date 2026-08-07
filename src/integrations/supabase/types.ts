@@ -14,16 +14,298 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      categories: {
+        Row: {
+          color: string | null
+          created_at: string
+          id: string
+          image_url: string | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      delivery_prices: {
+        Row: {
+          created_at: string
+          home_price: number
+          id: string
+          office_price: number
+          updated_at: string
+          wilaya: string
+        }
+        Insert: {
+          created_at?: string
+          home_price?: number
+          id?: string
+          office_price?: number
+          updated_at?: string
+          wilaya: string
+        }
+        Update: {
+          created_at?: string
+          home_price?: number
+          id?: string
+          office_price?: number
+          updated_at?: string
+          wilaya?: string
+        }
+        Relationships: []
+      }
+      orders: {
+        Row: {
+          address_detail: string | null
+          commune: string
+          created_at: string
+          customer_name: string
+          delivery_price: number | null
+          delivery_type: string
+          id: string
+          notes: string | null
+          phone: string
+          product_id: string | null
+          product_name: string
+          quantity: number | null
+          selected_color: string | null
+          selected_shoe_size: string | null
+          selected_size: string | null
+          status: string
+          total_price: number
+          updated_at: string
+          wilaya: string
+        }
+        Insert: {
+          address_detail?: string | null
+          commune: string
+          created_at?: string
+          customer_name: string
+          delivery_price?: number | null
+          delivery_type: string
+          id?: string
+          notes?: string | null
+          phone: string
+          product_id?: string | null
+          product_name: string
+          quantity?: number | null
+          selected_color?: string | null
+          selected_shoe_size?: string | null
+          selected_size?: string | null
+          status?: string
+          total_price: number
+          updated_at?: string
+          wilaya: string
+        }
+        Update: {
+          address_detail?: string | null
+          commune?: string
+          created_at?: string
+          customer_name?: string
+          delivery_price?: number | null
+          delivery_type?: string
+          id?: string
+          notes?: string | null
+          phone?: string
+          product_id?: string | null
+          product_name?: string
+          quantity?: number | null
+          selected_color?: string | null
+          selected_shoe_size?: string | null
+          selected_size?: string | null
+          status?: string
+          total_price?: number
+          updated_at?: string
+          wilaya?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_variants: {
+        Row: {
+          color: string
+          created_at: string
+          id: string
+          product_id: string
+          size: string
+          stock: number
+          updated_at: string
+        }
+        Insert: {
+          color: string
+          created_at?: string
+          id?: string
+          product_id: string
+          size: string
+          stock?: number
+          updated_at?: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          id?: string
+          product_id?: string
+          size?: string
+          stock?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_variants_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          category_id: string | null
+          colors: string[] | null
+          created_at: string
+          id: string
+          images: string[] | null
+          name: string
+          new_price: number
+          notes: string | null
+          old_price: number
+          shoe_sizes: string[] | null
+          show_notes: boolean | null
+          show_quantity: boolean | null
+          sizes: string[] | null
+          stock: number | null
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          category_id?: string | null
+          colors?: string[] | null
+          created_at?: string
+          id?: string
+          images?: string[] | null
+          name: string
+          new_price: number
+          notes?: string | null
+          old_price: number
+          shoe_sizes?: string[] | null
+          show_notes?: boolean | null
+          show_quantity?: boolean | null
+          sizes?: string[] | null
+          stock?: number | null
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          category_id?: string | null
+          colors?: string[] | null
+          created_at?: string
+          id?: string
+          images?: string[] | null
+          name?: string
+          new_price?: number
+          notes?: string | null
+          old_price?: number
+          shoe_sizes?: string[] | null
+          show_notes?: boolean | null
+          show_quantity?: boolean | null
+          sizes?: string[] | null
+          stock?: number | null
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      settings: {
+        Row: {
+          created_at: string
+          id: string
+          key: string
+          updated_at: string
+          value: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key: string
+          updated_at?: string
+          value?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key?: string
+          updated_at?: string
+          value?: string | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +432,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin"],
+    },
   },
 } as const
