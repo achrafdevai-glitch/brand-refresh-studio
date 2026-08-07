@@ -38,19 +38,26 @@ export const useOrders = () => {
   });
 };
 
+export type NewOrder = Omit<Order, "id" | "status" | "created_at" | "updated_at">;
+
 export const useCreateOrder = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (order: Omit<Order, "id" | "status" | "created_at" | "updated_at">) => {
-      const { data, error } = await supabase
-        .from("orders")
-        .insert({ ...order, status: "pending" })
-        .select()
-        .single();
+    mutationFn: async (order: NewOrder) => {
+      // IMPORTANT: no `.select()` here. Orders can be inserted by anyone (guest
+      // checkout) but only admins may read them, so asking PostgREST to return
+      // the inserted row makes Postgres evaluate the SELECT policy on the new
+      // row and fail the whole statement with 42501
+      // ("new row violates row-level security policy for table \"orders\"").
+      const { error } = await supabase.from("orders").insert({ ...order, status: "pending" });
 
-      if (error) throw error;
-      return data;
+      if (error) {
+        console.error("[orders] insert failed", { error, payload: order });
+        throw error;
+      }
+
+      return true;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
