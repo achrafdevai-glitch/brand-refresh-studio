@@ -4,6 +4,7 @@ import { useProductVariants } from "@/hooks/useProductVariants";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ShoppingBag, Sparkles, TrendingDown, XCircle } from "lucide-react";
+import { StorageImage } from "@/components/StorageImage";
 
 interface ProductCardProps {
   product: Product;

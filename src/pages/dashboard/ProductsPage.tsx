@@ -32,6 +32,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Pencil, Trash2, Upload, X, Loader2, Palette, MessageSquare, Package, Layers } from "lucide-react";
 import { toast } from "sonner";
+import { StorageImage } from "@/components/StorageImage";
 
 const CLOTHING_SIZES = ["S", "M", "L", "XL", "XXL", "XXXL"];
 const SHOE_SIZES = ["38", "39", "40", "41", "42", "43", "44"];
@@ -703,7 +704,7 @@ const ProductsPage = () => {
                   <div className="flex flex-wrap gap-2 mt-2">
                     {formData.images.map((url, index) => (
                       <div key={index} className="relative">
-                        <img
+                        <StorageImage
                           src={url}
                           alt=""
                           className="w-20 h-20 object-cover rounded-lg"
@@ -793,10 +794,10 @@ const ProductsPage = () => {
               >
                 <div className="aspect-square relative overflow-hidden">
                   {product.images && product.images.length > 0 ? (
-                    <img
+                    <StorageImage
                       src={product.images[0]}
                       alt={product.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   ) : (
                     <div className="w-full h-full bg-muted flex items-center justify-center">

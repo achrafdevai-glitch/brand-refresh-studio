@@ -21,6 +21,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Pencil, Trash2, Upload, X, Loader2, Palette } from "lucide-react";
 import { toast } from "sonner";
+import { StorageImage } from "@/components/StorageImage";
 
 const CategoriesPage = () => {
   const { data: categories, isLoading } = useCategories();
@@ -272,10 +273,10 @@ const CategoriesPage = () => {
               >
                 <div className="aspect-square relative overflow-hidden">
                   {category.image_url ? (
-                    <img
+                    <StorageImage
                       src={category.image_url}
                       alt={category.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   ) : (
                     <div

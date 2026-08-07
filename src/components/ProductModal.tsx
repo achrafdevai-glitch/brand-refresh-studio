@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Play, X, Sparkles, ShoppingBag, TrendingDown, Tag, XCircle } from "lucide-react";
 import OrderForm from "./OrderForm";
+import { StorageImage } from "@/components/StorageImage";
 
 interface ProductModalProps {
   product: Product | null;
@@ -121,9 +122,10 @@ const ProductModal = ({ product, onClose }: ProductModalProps) => {
                       className="w-full h-full"
                     >
                       {images.length > 0 ? (
-                        <img
+                        <StorageImage
                           src={images[currentImageIndex]}
                           alt={product.name}
+                          eager
                           className="w-full h-full object-cover"
                         />
                       ) : (
@@ -220,7 +222,7 @@ const ProductModal = ({ product, onClose }: ProductModalProps) => {
                             : "border-transparent opacity-60 hover:opacity-100"
                         }`}
                       >
-                        <img
+                        <StorageImage
                           src={image}
                           alt=""
                           className="w-full h-full object-cover"
